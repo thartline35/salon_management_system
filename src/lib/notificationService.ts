@@ -30,6 +30,30 @@ export interface WorkInResponseParams {
   selectedTime?: string;
 }
 
+// Utility function to format phone numbers for SMS
+function formatPhoneForSMS(phone: string): string {
+  // Remove all non-digit characters
+  const cleaned = phone.replace(/\D/g, '');
+  
+  // If it's a 10-digit US number, add +1
+  if (cleaned.length === 10) {
+    return `+1${cleaned}`;
+  }
+  
+  // If it's already 11 digits and starts with 1, add +
+  if (cleaned.length === 11 && cleaned.startsWith('1')) {
+    return `+${cleaned}`;
+  }
+  
+  // If it already has a +, return as is
+  if (phone.startsWith('+')) {
+    return phone;
+  }
+  
+  // Otherwise, assume it's a US number and add +1
+  return `+1${cleaned}`;
+}
+
 class NotificationService {
   private twilioAccountSid: string;
   private twilioAuthToken: string;
@@ -64,6 +88,9 @@ class NotificationService {
       //   to: params.to
       // });
 
+      // Format phone number for SMS
+      const formattedPhone = formatPhoneForSMS(params.to);
+      
       // Use Vercel serverless function
       const response = await fetch('https://salon-management-system-five.vercel.app/api/notifications', {
         method: 'POST',
@@ -72,7 +99,7 @@ class NotificationService {
         },
         body: JSON.stringify({
           action: 'send-sms',
-          to: params.to,
+          to: formattedPhone,
           message: params.message,
           carrier: params.carrier
         })

@@ -67,14 +67,37 @@ async function handleSMS(res, { to, message, carrier = 'verizon' }) {
   };
 
   try {
-    // Clean phone number
-    const cleanPhone = to.replace(/\D/g, '');
-    const phone = cleanPhone.length === 11 && cleanPhone.startsWith('1') 
-      ? cleanPhone.substring(1) 
-      : cleanPhone;
+    // Format phone number for SMS
+    let formattedPhone = to;
+    
+    // Remove all non-digit characters
+    const cleaned = to.replace(/\D/g, '');
+    
+    // If it's a 10-digit US number, add +1
+    if (cleaned.length === 10) {
+      formattedPhone = `+1${cleaned}`;
+    }
+    // If it's already 11 digits and starts with 1, add +
+    else if (cleaned.length === 11 && cleaned.startsWith('1')) {
+      formattedPhone = `+${cleaned}`;
+    }
+    // If it already has a +, use as is
+    else if (to.startsWith('+')) {
+      formattedPhone = to;
+    }
+    // Otherwise, assume it's a US number and add +1
+    else {
+      formattedPhone = `+1${cleaned}`;
+    }
+    
+    // For email-to-SMS gateways, we need just the digits without the +
+    const phone = formattedPhone.replace('+', '').replace(/\D/g, '');
+    const cleanPhone = phone.length === 11 && phone.startsWith('1') 
+      ? phone.substring(1) 
+      : phone;
 
     const gateway = smsGateways[carrier] || smsGateways.verizon;
-    const email = `${phone}${gateway}`;
+    const email = `${cleanPhone}${gateway}`;
 
     // Use a free email service (Resend, Mailgun, or similar)
     const emailResult = await sendEmailViaService({
