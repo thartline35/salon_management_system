@@ -65,7 +65,7 @@ class NotificationService {
       // });
 
       // Use Vercel serverless function
-      const response = await fetch('/api/notifications', {
+      const response = await fetch('https://salon-management-system-five.vercel.app/api/notifications', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -113,7 +113,7 @@ class NotificationService {
       // });
 
       // Use Vercel serverless function
-      const response = await fetch('/api/notifications', {
+      const response = await fetch('https://salon-management-system-five.vercel.app/api/notifications', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
