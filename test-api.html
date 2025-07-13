@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Notification API</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        button { padding: 10px 15px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .result { margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 3px; }
+        .error { background: #f8d7da; color: #721c24; }
+        .success { background: #d4edda; color: #155724; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test Notification API</h1>
+    
+    <div class="test-section">
+        <h3>Test SMS Notification</h3>
+        <button onclick="testSMS()">Send Test SMS</button>
+        <div id="smsResult" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>Test Email Notification</h3>
+        <button onclick="testEmail()">Send Test Email</button>
+        <div id="emailResult" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>Test API Endpoint</h3>
+        <button onclick="testEndpoint()">Test API Connection</button>
+        <div id="endpointResult" class="result"></div>
+    </div>
+
+    <script>
+        async function testSMS() {
+            const resultDiv = document.getElementById('smsResult');
+            resultDiv.innerHTML = 'Sending...';
+            resultDiv.className = 'result';
+            
+            try {
+                const response = await fetch('https://salon-management-system-five.vercel.app/api/notifications', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'send-sms',
+                        to: '5551234567',
+                        message: 'Test SMS from Twisted Roots Salon',
+                        carrier: 'verizon'
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `<strong>Success:</strong> ${JSON.stringify(result, null, 2)}`;
+                    resultDiv.className = 'result success';
+                } else {
+                    resultDiv.innerHTML = `<strong>Error ${response.status}:</strong> ${JSON.stringify(result, null, 2)}`;
+                    resultDiv.className = 'result error';
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<strong>Network Error:</strong> ${error.message}`;
+                resultDiv.className = 'result error';
+            }
+        }
+
+        async function testEmail() {
+            const resultDiv = document.getElementById('emailResult');
+            resultDiv.innerHTML = 'Sending...';
+            resultDiv.className = 'result';
+            
+            try {
+                const response = await fetch('https://salon-management-system-five.vercel.app/api/notifications', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'send-email',
+                        to: 'test@example.com',
+                        subject: 'Test Email from Twisted Roots',
+                        message: 'This is a test email from the salon management system.'
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `<strong>Success:</strong> ${JSON.stringify(result, null, 2)}`;
+                    resultDiv.className = 'result success';
+                } else {
+                    resultDiv.innerHTML = `<strong>Error ${response.status}:</strong> ${JSON.stringify(result, null, 2)}`;
+                    resultDiv.className = 'result error';
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<strong>Network Error:</strong> ${error.message}`;
+                resultDiv.className = 'result error';
+            }
+        }
+
+        async function testEndpoint() {
+            const resultDiv = document.getElementById('endpointResult');
+            resultDiv.innerHTML = 'Testing...';
+            resultDiv.className = 'result';
+            
+            try {
+                const response = await fetch('https://salon-management-system-five.vercel.app/api/notifications', {
+                    method: 'OPTIONS'
+                });
+
+                resultDiv.innerHTML = `<strong>Status:</strong> ${response.status}<br><strong>Headers:</strong> ${JSON.stringify(Object.fromEntries(response.headers.entries()), null, 2)}`;
+                resultDiv.className = 'result success';
+            } catch (error) {
+                resultDiv.innerHTML = `<strong>Connection Error:</strong> ${error.message}`;
+                resultDiv.className = 'result error';
+            }
+        }
+    </script>
+</body>
+</html> 
