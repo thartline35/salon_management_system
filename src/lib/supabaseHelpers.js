@@ -483,6 +483,7 @@ export const supabaseHelpers = {
           phone: customerData.phone,
           email: customerData.email && customerData.email.trim() ? customerData.email.trim() : null,
           role: "customer",
+          carrier: customerData.carrier || null,
         })
         .select()
         .single();
@@ -508,7 +509,8 @@ export const supabaseHelpers = {
           user_profiles (
             full_name,
             phone,
-            email
+            email,
+            carrier
           )
         `
         )
@@ -532,6 +534,7 @@ export const supabaseHelpers = {
           lastVisit: "",
           avatar: "👤",
           preferredContact: data.preferred_contact || "sms",
+          carrier: data.user_profiles?.carrier || null,
         },
       };
     } catch (error) {
@@ -600,7 +603,8 @@ export const supabaseHelpers = {
         user_profiles (
           full_name,
           phone,
-          email
+          email,
+          carrier
         )
       `);
 
@@ -617,6 +621,7 @@ export const supabaseHelpers = {
           lastVisit: customer.last_visit || "",
           avatar: "👤",
           preferredContact: customer.preferred_contact || "sms",
+          carrier: customer.user_profiles?.carrier || null,
         })),
       };
     } catch (error) {

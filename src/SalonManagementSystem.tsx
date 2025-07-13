@@ -1158,6 +1158,29 @@ const CallInModal: React.FC<{
             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
           />
 
+          {/* Carrier selection for SMS notifications */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Mobile Carrier (for text notifications)
+            </label>
+            <select
+              value={form.customerCarrier || ""}
+              onChange={(e) => setForm({ ...form, customerCarrier: e.target.value })}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+            >
+              <option value="">Select carrier (optional)</option>
+              <option value="verizon">Verizon</option>
+              <option value="att">AT&T</option>
+              <option value="tmobile">T-Mobile</option>
+              <option value="sprint">Sprint</option>
+              <option value="boost">Boost Mobile</option>
+              <option value="cricket">Cricket</option>
+              <option value="metro">Metro by T-Mobile</option>
+              <option value="uscellular">US Cellular</option>
+              <option value="virgin">Virgin Mobile</option>
+            </select>
+          </div>
+
           {/* Service Selection */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Service *</label>
@@ -1230,9 +1253,9 @@ const CallInModal: React.FC<{
                   
                   return (
                     <select
-                      value={form.appointmentTime}
-                      onChange={(e) => setForm({ ...form, appointmentTime: e.target.value })}
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+              value={form.appointmentTime}
+              onChange={(e) => setForm({ ...form, appointmentTime: e.target.value })}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
                     >
                       <option value="">Select a time...</option>
                       {availableSlots.map((timeSlot) => (
@@ -1309,20 +1332,20 @@ const GalleryModal: React.FC<{
         <div className="flex flex-col h-full">
           {/* Fixed Header */}
           <div className="flex justify-between items-center p-6 border-b border-gray-200 flex-shrink-0">
-            <h3 className="text-xl font-bold text-gray-900">
-              {editingImage ? "Edit Gallery Photo" : "Add Gallery Photo"}
-            </h3>
-            <button
-              onClick={onClose}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-all"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
+          <h3 className="text-xl font-bold text-gray-900">
+            {editingImage ? "Edit Gallery Photo" : "Add Gallery Photo"}
+          </h3>
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-gray-100 rounded-lg transition-all"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
 
                     {/* Scrollable Content */}
           <div className="flex-1 overflow-y-auto p-6">
-            <div className="space-y-4">
+        <div className="space-y-4">
               {/* Before/After Toggle */}
               <div>
                 <label className="flex items-center space-x-2">
@@ -1449,73 +1472,73 @@ const GalleryModal: React.FC<{
                 </div>
               ) : (
                 /* Single Photo Upload */
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Upload Photo {!editingImage && "*"}
-                  </label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-purple-400 transition-colors">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          const reader = new FileReader();
-                          reader.onload = (e) => {
-                            setForm({ 
-                              ...form, 
-                              imageFile: file,
-                              imagePreview: e.target?.result 
-                            });
-                          };
-                          reader.readAsDataURL(file);
-                        }
-                      }}
-                      className="hidden"
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Upload Photo {!editingImage && "*"}
+            </label>
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-purple-400 transition-colors">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                      setForm({ 
+                        ...form, 
+                        imageFile: file,
+                        imagePreview: e.target?.result 
+                      });
+                    };
+                    reader.readAsDataURL(file);
+                  }
+                }}
+                className="hidden"
                       id="single-photo-upload"
-                    />
+              />
                     <label htmlFor="single-photo-upload" className="cursor-pointer">
-                      {form.imagePreview || editingImage?.url ? (
-                        <div className="mb-4">
-                          <img
-                            src={form.imagePreview || editingImage?.url}
-                            alt="Preview"
-                            className="w-32 h-32 object-cover rounded-lg mx-auto"
-                          />
-                        </div>
-                      ) : (
-                        <Camera className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                      )}
-                      <p className="text-gray-600 mb-2">
-                        {editingImage ? "Click to change photo" : "Click to upload a photo"}
-                      </p>
-                      <p className="text-sm text-gray-500">JPG, PNG, GIF up to 5MB</p>
-                    </label>
+                {form.imagePreview || editingImage?.url ? (
+                  <div className="mb-4">
+                    <img
+                      src={form.imagePreview || editingImage?.url}
+                      alt="Preview"
+                      className="w-32 h-32 object-cover rounded-lg mx-auto"
+                    />
                   </div>
-                  {form.imageFile && (
-                    <div className="mt-3 p-3 bg-green-50 rounded-lg">
-                      <p className="text-green-700 text-sm">
-                        ✓ {form.imageFile.name} selected
-                      </p>
-                    </div>
-                  )}
-                </div>
+                ) : (
+                  <Camera className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                )}
+                <p className="text-gray-600 mb-2">
+                  {editingImage ? "Click to change photo" : "Click to upload a photo"}
+                </p>
+                <p className="text-sm text-gray-500">JPG, PNG, GIF up to 5MB</p>
+              </label>
+            </div>
+            {form.imageFile && (
+              <div className="mt-3 p-3 bg-green-50 rounded-lg">
+                <p className="text-green-700 text-sm">
+                  ✓ {form.imageFile.name} selected
+                </p>
+              </div>
+            )}
+          </div>
               )}
 
-              {/* Caption */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Photo Caption
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g., Beautiful blonde highlights, Before and after color correction"
-                  value={form.caption}
-                  onChange={(e) => setForm({ ...form, caption: e.target.value })}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
-                />
+          {/* Caption */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Photo Caption
+            </label>
+            <input
+              type="text"
+              placeholder="e.g., Beautiful blonde highlights, Before and after color correction"
+              value={form.caption}
+              onChange={(e) => setForm({ ...form, caption: e.target.value })}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+            />
               </div>
-            </div>
+          </div>
 
             <div className="flex space-x-4 mt-6">
               <button
@@ -1581,7 +1604,7 @@ const EditAppointmentModal: React.FC<{
           <div className="p-4 bg-gray-50 rounded-lg">
             <h4 className="font-medium text-gray-900 mb-2">Current Appointment</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                             <div>
+          <div>
                  <p className="text-gray-600">Client</p>
                  <p className="font-medium">{clients.find((c: Client) => c.id === appointment.clientId)?.name || "Unknown Client"}</p>
                </div>
@@ -1617,7 +1640,7 @@ const EditAppointmentModal: React.FC<{
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 New Time *
-              </label>
+            </label>
               {form.date && staffMember && service ? (
                 (() => {
                   const availableSlots = timeSlotUtils.generateAvailableTimeSlots(
@@ -1959,6 +1982,7 @@ const SalonManagementSystem: React.FC = () => {
     customerName: "",
     customerPhone: "",
     customerEmail: "",
+    customerCarrier: "",
     selectedService: null as Service | null,
     selectedStaff: null as StaffMember | null,
     appointmentDate: "",
@@ -2143,9 +2167,9 @@ const SalonManagementSystem: React.FC = () => {
       }
     } else {
       // For single photos, require one image
-      if (!galleryForm.imageFile && !editingGalleryImage) {
-        sendNotification("Please select a photo to upload", "error");
-        return;
+    if (!galleryForm.imageFile && !editingGalleryImage) {
+      sendNotification("Please select a photo to upload", "error");
+      return;
       }
     }
 
@@ -2171,18 +2195,18 @@ const SalonManagementSystem: React.FC = () => {
         }
 
         // Update local state
-        setStaff(prev => prev.map(s => 
-          s.id === currentStaffId 
-            ? { 
-                ...s, 
-                gallery: s.gallery?.map(img => 
+          setStaff(prev => prev.map(s => 
+            s.id === currentStaffId 
+              ? { 
+                  ...s, 
+                  gallery: s.gallery?.map(img => 
                   img.id === editingGalleryImage.id 
                     ? { ...img, url: imageUrl, caption: galleryForm.caption, isBeforeAfter: galleryForm.isBeforeAfter }
                     : img
                 ) || []
-              }
-            : s
-        ));
+                }
+              : s
+          ));
 
         sendNotification("✅ Gallery photo updated successfully!", "success");
       } else {
@@ -2220,10 +2244,10 @@ const SalonManagementSystem: React.FC = () => {
           const imageUrl = galleryForm.imagePreview || "https://via.placeholder.com/400x400?text=Uploaded+Photo";
           uploadPromises.push(
             databaseHelpers.addGalleryImage({
-              staffMemberId: currentStaffId,
-              imageUrl: imageUrl,
-              caption: galleryForm.caption || "Gallery photo",
-              isBeforeAfter: galleryForm.isBeforeAfter,
+          staffMemberId: currentStaffId,
+          imageUrl: imageUrl,
+          caption: galleryForm.caption || "Gallery photo",
+          isBeforeAfter: galleryForm.isBeforeAfter,
             })
           );
         }
@@ -2241,11 +2265,11 @@ const SalonManagementSystem: React.FC = () => {
         const newImages = results
           .filter(result => result.success && result.data)
           .map(result => ({
-            id: result.data!.id,
-            url: result.data!.url,
-            caption: result.data!.caption,
-            uploadDate: result.data!.uploadDate,
-            isBeforeAfter: result.data!.isBeforeAfter,
+                    id: result.data!.id,
+                    url: result.data!.url,
+                    caption: result.data!.caption,
+                    uploadDate: result.data!.uploadDate,
+                    isBeforeAfter: result.data!.isBeforeAfter,
           }));
 
         setStaff(prev => prev.map(s => 
@@ -2253,24 +2277,24 @@ const SalonManagementSystem: React.FC = () => {
             ? { 
                 ...s, 
                 gallery: [...(s.gallery || []), ...newImages]
-              }
-            : s
-        ));
+                }
+              : s
+          ));
 
         sendNotification(`✅ ${newImages.length} gallery photo${newImages.length > 1 ? 's' : ''} uploaded successfully!`, "success");
       }
 
-              // Reset form
-        setGalleryForm({
+      // Reset form
+      setGalleryForm({
           beforeImageFile: null,
           beforeImagePreview: "",
           afterImageFile: null,
           afterImagePreview: "",
-          imageFile: null,
-          imagePreview: "",
-          caption: "",
-          isBeforeAfter: false,
-        });
+        imageFile: null,
+        imagePreview: "",
+        caption: "",
+        isBeforeAfter: false,
+      });
       setShowGalleryModal(false);
       setEditingGalleryImage(null);
     } catch (error) {
@@ -2516,16 +2540,17 @@ const SalonManagementSystem: React.FC = () => {
           "success"
         );
         // Reset form
-        setCallInForm({
-          customerName: "",
-          customerPhone: "",
-          customerEmail: "",
-          selectedService: null,
-          selectedStaff: null,
-          appointmentDate: "",
-          appointmentTime: "",
-          notes: "",
-        });
+            setCallInForm({
+      customerName: "",
+      customerPhone: "",
+      customerEmail: "",
+      customerCarrier: "",
+      selectedService: null,
+      selectedStaff: null,
+      appointmentDate: "",
+      appointmentTime: "",
+      notes: "",
+    });
         setShowCallInModal(false);
         // Add to local state
         const newAppointment = transformDatabaseToUI.appointment(result.data);
@@ -2586,6 +2611,12 @@ const SalonManagementSystem: React.FC = () => {
       !customerBooking.customerInfo.phone.trim()
     ) {
       sendNotification("Please complete all required booking fields", "error");
+      return;
+    }
+
+    // Require carrier selection if SMS is preferred
+    if (customerBooking.customerInfo.preferredContact === "sms" && !customerBooking.customerInfo.carrier) {
+      sendNotification("Please select your mobile carrier for text notifications", "error");
       return;
     }
 
@@ -2768,6 +2799,10 @@ const SalonManagementSystem: React.FC = () => {
       if (!emailRegex.test(customerBooking.customerInfo.email.trim())) {
         validationErrors.push("Please enter a valid email address");
       }
+    }
+    // Carrier validation (if SMS is preferred)
+    if (customerBooking.customerInfo.preferredContact === "sms" && !customerBooking.customerInfo.carrier) {
+      validationErrors.push("Please select your mobile carrier for text notifications");
     }
     if (validationErrors.length > 0) {
       sendNotification(`Please fix the following errors: ${validationErrors.join(", ")}`, "error");
@@ -3204,7 +3239,7 @@ const SalonManagementSystem: React.FC = () => {
                           <div className="flex items-center justify-between">
                             <div>
                               <h3 className="font-medium text-gray-900">{client?.name || "Unknown Client"}</h3>
-                              <p className="text-sm text-gray-600">{service?.name} with {staffMember?.name}</p>
+                                                             <p className="text-sm text-gray-600">{service?.name} with {staffMember?.name}</p>
                               <p className="text-sm text-gray-500">
                                 {appointment.date} at {new Date(`2000-01-01T${appointment.time}:00`).toLocaleTimeString("en-US", {
                                   hour: "numeric",
@@ -3214,14 +3249,14 @@ const SalonManagementSystem: React.FC = () => {
                               </p>
                             </div>
                             <div className="flex flex-col items-end space-y-2">
-                              <span className={`px-2 py-1 rounded text-xs font-medium ${
-                                appointment.status === "confirmed" ? "bg-green-100 text-green-700" :
-                                appointment.status === "completed" ? "bg-blue-100 text-blue-700" :
+                            <span className={`px-2 py-1 rounded text-xs font-medium ${
+                              appointment.status === "confirmed" ? "bg-green-100 text-green-700" :
+                              appointment.status === "completed" ? "bg-blue-100 text-blue-700" :
                                 appointment.status === "cancelled" ? "bg-red-100 text-red-700" :
-                                "bg-yellow-100 text-yellow-700"
-                              }`}>
-                                {appointment.status}
-                              </span>
+                              "bg-yellow-100 text-yellow-700"
+                            }`}>
+                              {appointment.status}
+                            </span>
                               <div className="flex space-x-2">
                                 <button
                                   onClick={() => {
@@ -4248,11 +4283,45 @@ const SalonManagementSystem: React.FC = () => {
                   </select>
                 </div>
 
+                {/* Carrier selection for SMS notifications */}
+                {customerBooking.customerInfo.preferredContact === "sms" && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Mobile Carrier (for text notifications)
+                    </label>
+                    <select
+                      value={customerBooking.customerInfo.carrier || ""}
+                      onChange={(e) =>
+                        setCustomerBooking((prev) => ({
+                          ...prev,
+                          customerInfo: {
+                            ...prev.customerInfo,
+                            carrier: e.target.value,
+                          },
+                        }))
+                      }
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                    >
+                      <option value="">Select your carrier...</option>
+                      <option value="verizon">Verizon</option>
+                      <option value="att">AT&T</option>
+                      <option value="tmobile">T-Mobile</option>
+                      <option value="sprint">Sprint</option>
+                      <option value="boost">Boost Mobile</option>
+                      <option value="cricket">Cricket</option>
+                      <option value="metro">Metro by T-Mobile</option>
+                      <option value="uscellular">US Cellular</option>
+                      <option value="virgin">Virgin Mobile</option>
+                    </select>
+                  </div>
+                )}
+
                 <button
                   onClick={handleCustomerBookingSubmit}
                   disabled={
                     !customerBooking.customerInfo.name.trim() ||
-                    !customerBooking.customerInfo.phone.trim()
+                    !customerBooking.customerInfo.phone.trim() ||
+                    (customerBooking.customerInfo.preferredContact === "sms" && !customerBooking.customerInfo.carrier)
                   }
                   className="w-full bg-green-600 text-white py-4 rounded-lg hover:bg-green-700 transition-all font-medium text-lg disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed"
                 >
@@ -4452,18 +4521,18 @@ const SalonManagementSystem: React.FC = () => {
                       );
                       
                       return (
-                        <select
-                          value={customerBooking.selectedTime}
-                          onChange={(e) => {
+                  <select
+                    value={customerBooking.selectedTime}
+                    onChange={(e) => {
                             console.log("Time selected:", e.target.value);
-                            setCustomerBooking((prev) => ({
-                              ...prev,
-                              selectedTime: e.target.value,
-                            }));
-                          }}
-                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
-                        >
-                          <option value="">Any time that works</option>
+                      setCustomerBooking((prev) => ({
+                        ...prev,
+                        selectedTime: e.target.value,
+                      }));
+                    }}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                  >
+                    <option value="">Any time that works</option>
                           {availableSlots.map((timeSlot) => (
                             <option key={timeSlot} value={timeSlot}>
                               {new Date(`2000-01-01T${timeSlot}:00`).toLocaleTimeString("en-US", {
@@ -4473,7 +4542,7 @@ const SalonManagementSystem: React.FC = () => {
                               })} ({customerBooking.selectedService?.duration} min)
                             </option>
                           ))}
-                        </select>
+                  </select>
                       );
                     })()
                   ) : (
@@ -4564,6 +4633,39 @@ const SalonManagementSystem: React.FC = () => {
                     </select>
                   </div>
 
+                  {/* Carrier selection for SMS notifications */}
+                  {customerBooking.customerInfo.preferredContact === "sms" && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Mobile Carrier (for text notifications)
+                      </label>
+                      <select
+                        value={customerBooking.customerInfo.carrier || ""}
+                        onChange={(e) =>
+                          setCustomerBooking((prev) => ({
+                            ...prev,
+                            customerInfo: {
+                              ...prev.customerInfo,
+                              carrier: e.target.value,
+                            },
+                          }))
+                        }
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                      >
+                        <option value="">Select your carrier...</option>
+                        <option value="verizon">Verizon</option>
+                        <option value="att">AT&T</option>
+                        <option value="tmobile">T-Mobile</option>
+                        <option value="sprint">Sprint</option>
+                        <option value="boost">Boost Mobile</option>
+                        <option value="cricket">Cricket</option>
+                        <option value="metro">Metro by T-Mobile</option>
+                        <option value="uscellular">US Cellular</option>
+                        <option value="virgin">Virgin Mobile</option>
+                      </select>
+                    </div>
+                  )}
+
                   <textarea
                     placeholder="Special requests or notes for your stylist"
                     value={customerBooking.customerInfo.notes}
@@ -4630,7 +4732,8 @@ const SalonManagementSystem: React.FC = () => {
                   {(!customerBooking.selectedStaff ||
                     !customerBooking.selectedDate ||
                     !customerBooking.customerInfo.name.trim() ||
-                    !customerBooking.customerInfo.phone.trim()) && (
+                    !customerBooking.customerInfo.phone.trim() ||
+                    (customerBooking.customerInfo.preferredContact === "sms" && !customerBooking.customerInfo.carrier)) && (
                     <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                       <p className="text-yellow-800 text-sm font-medium">
                         Please complete the following:
@@ -4648,6 +4751,9 @@ const SalonManagementSystem: React.FC = () => {
                         {!customerBooking.customerInfo.phone.trim() && (
                           <li>• Enter your phone number</li>
                         )}
+                        {customerBooking.customerInfo.preferredContact === "sms" && !customerBooking.customerInfo.carrier && (
+                          <li>• Select your mobile carrier</li>
+                        )}
                       </ul>
                     </div>
                   )}
@@ -4662,7 +4768,8 @@ const SalonManagementSystem: React.FC = () => {
                       !customerBooking.selectedStaff ||
                       !customerBooking.selectedDate ||
                       !customerBooking.customerInfo.name.trim() ||
-                      !customerBooking.customerInfo.phone.trim()
+                      !customerBooking.customerInfo.phone.trim() ||
+                      (customerBooking.customerInfo.preferredContact === "sms" && !customerBooking.customerInfo.carrier)
                     }
                     className="w-full bg-orange-600 text-white py-4 px-6 rounded-lg hover:bg-orange-700 transition-all font-medium text-lg disabled:bg-gray-300 disabled:text-gray-900 disabled:cursor-not-allowed border-2 border-orange-600 disabled:border-gray-300"
                     style={{ 
@@ -4670,17 +4777,20 @@ const SalonManagementSystem: React.FC = () => {
                       color: (!customerBooking.selectedStaff ||
                         !customerBooking.selectedDate ||
                         !customerBooking.customerInfo.name.trim() ||
-                        !customerBooking.customerInfo.phone.trim()) ? '#111827' : '#000000',
+                        !customerBooking.customerInfo.phone.trim() ||
+                        (customerBooking.customerInfo.preferredContact === "sms" && !customerBooking.customerInfo.carrier)) ? '#111827' : '#000000',
                       textShadow: (!customerBooking.selectedStaff ||
                         !customerBooking.selectedDate ||
                         !customerBooking.customerInfo.name.trim() ||
-                        !customerBooking.customerInfo.phone.trim()) ? 'none' : '0 1px 2px rgba(255,255,255,0.8)'
+                        !customerBooking.customerInfo.phone.trim() ||
+                        (customerBooking.customerInfo.preferredContact === "sms" && !customerBooking.customerInfo.carrier)) ? 'none' : '0 1px 2px rgba(255,255,255,0.8)'
                     }}
                   >
                     {!customerBooking.selectedStaff ||
                     !customerBooking.selectedDate ||
                     !customerBooking.customerInfo.name.trim() ||
-                    !customerBooking.customerInfo.phone.trim()
+                    !customerBooking.customerInfo.phone.trim() ||
+                    (customerBooking.customerInfo.preferredContact === "sms" && !customerBooking.customerInfo.carrier)
                       ? "Complete Required Fields"
                       : "Submit Work-In Request"}
                   </button>
@@ -4923,36 +5033,36 @@ const SalonManagementSystem: React.FC = () => {
                             key={appointment.id}
                             className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-all"
                           >
-                                                      <div className="flex items-start justify-between">
-                            <div className="flex items-center space-x-3">
-                              <span className="text-xl">
-                                {client?.avatar || "👤"}
-                              </span>
-                              <div>
-                                <h3 className="font-medium text-gray-900">
-                                  {client?.name || "Unknown Client"}
-                                </h3>
-                                <p className="text-sm text-gray-600">
-                                  {service?.name} - {service?.duration} min
-                                </p>
-                                <p className="text-sm text-purple-600 font-medium">
-                                  {new Date(appointment.date).toLocaleDateString("en-US", {
-                                    weekday: "long",
-                                    month: "long",
-                                    day: "numeric",
+                            <div className="flex items-start justify-between">
+                              <div className="flex items-center space-x-3">
+                                <span className="text-xl">
+                                  {client?.avatar || "👤"}
+                                </span>
+                                <div>
+                                  <h3 className="font-medium text-gray-900">
+                                    {client?.name || "Unknown Client"}
+                                  </h3>
+                                  <p className="text-sm text-gray-600">
+                                    {service?.name} - {service?.duration} min
+                                  </p>
+                                  <p className="text-sm text-purple-600 font-medium">
+                                    {new Date(appointment.date).toLocaleDateString("en-US", {
+                                      weekday: "long",
+                                      month: "long",
+                                      day: "numeric",
                                   })} at {new Date(`2000-01-01T${appointment.time}:00`).toLocaleTimeString("en-US", {
                                     hour: "numeric",
                                     minute: "2-digit",
                                     hour12: true,
                                   })}
-                                </p>
-                                {appointment.notes && (
-                                  <p className="text-sm text-gray-500 mt-1 italic">
-                                    "{appointment.notes}"
                                   </p>
-                                )}
+                                  {appointment.notes && (
+                                    <p className="text-sm text-gray-500 mt-1 italic">
+                                      "{appointment.notes}"
+                                    </p>
+                                  )}
+                                </div>
                               </div>
-                            </div>
                             <div className="flex flex-col items-end space-y-2">
                               <span
                                 className={`px-2 py-1 rounded text-xs font-medium ${
@@ -4992,7 +5102,7 @@ const SalonManagementSystem: React.FC = () => {
                                 )}
                               </div>
                             </div>
-                          </div>
+                            </div>
                           </div>
                         );
                       })}

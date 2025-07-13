@@ -71,6 +71,7 @@ export interface CustomerInfo {
   email: string;
   notes: string;
   preferredContact: "email" | "sms";
+  carrier?: string; // Added for SMS notifications
 }
 
 // Work-in request types

@@ -171,6 +171,9 @@ class NotificationService {
     const { customerInfo, requestedDate, requestedTime } = request;
     const serviceName = services.find((s) => s.id === request.serviceId)?.name || "Service";
     
+    // Get carrier from customer info or default to verizon
+    const carrier = customerInfo.carrier || "verizon";
+    
     const formattedDate = new Date(requestedDate).toLocaleDateString("en-US", {
       weekday: "long",
       month: "long",
@@ -238,7 +241,8 @@ Thank you for choosing Twisted Roots!`;
 
         return await this.sendSMS({
           to: customerInfo.phone,
-          message: smsMessage
+          message: smsMessage,
+          carrier: carrier
         });
       }
     } catch (error) {
@@ -254,6 +258,9 @@ Thank you for choosing Twisted Roots!`;
       month: "long",
       day: "numeric",
     });
+
+    // Get carrier from client info or default to verizon
+    const carrier = client.carrier || "verizon";
 
     const timeDisplay = new Date(`2000-01-01T${appointment.time}:00`).toLocaleTimeString("en-US", {
       hour: "numeric",
@@ -287,7 +294,8 @@ Thank you for choosing Twisted Roots!`;
 
         return await this.sendSMS({
           to: client.phone,
-          message: smsMessage
+          message: smsMessage,
+          carrier: carrier
         });
       }
     } catch (error) {
