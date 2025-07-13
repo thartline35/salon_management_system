@@ -15,15 +15,11 @@ import {
   Scissors,
   Clock,
   Plus,
-  Search,
-  Edit,
-  Trash2,
   User,
   Bell,
   DollarSign,
   X,
   ArrowLeft,
-  Globe,
   CheckCircle,
   Camera,
 } from "lucide-react";
@@ -31,9 +27,6 @@ import { supabaseHelpers } from "./lib/supabaseHelpers";
 import { notificationService } from "./lib/notificationService";
 import {
   Notification,
-  StaffAvailability,
-  StaffGalleryImage,
-  NotificationPreferences,
   StaffMember,
   Client,
   Service,
@@ -46,11 +39,6 @@ import {
   ModalProps,
   StaffModalProps,
   ServiceModalProps,
-  SendSMSResult,
-  SendSMSParams,
-  SendEmailResult,
-  SendEmailParams,
-  NotificationService,
   WorkInResponseModalProps,
   WorkInRequestCardProps,
 } from "./types";
@@ -1890,17 +1878,13 @@ const SalonManagementSystem: React.FC = () => {
     loading,
     setClients,
     setStaff,
-    setServices,
     setAppointments,
     setWorkInRequests,
     addStaff,
     updateStaff,
     addService,
     updateService,
-    addCustomer,
-    createAppointment,
     updateAppointment,
-    createWorkInRequest,
     updateWorkInRequest,
   } = useProductionDataManagement();
 
@@ -2293,7 +2277,7 @@ const SalonManagementSystem: React.FC = () => {
       console.error("Gallery upload error:", error);
       sendNotification("An unexpected error occurred while uploading", "error");
     }
-  }, [galleryForm, editingGalleryImage, currentStaffId, staff, setStaff, sendNotification, databaseHelpers]);
+  }, [galleryForm, editingGalleryImage, currentStaffId, staff, setStaff, sendNotification]);
 
   // Gallery delete handler - Removes images from stylist galleries with database cleanup
   const handleDeleteGalleryImage = useCallback(async (image: any) => {
@@ -2320,7 +2304,7 @@ const SalonManagementSystem: React.FC = () => {
       console.error("Gallery delete error:", error);
       sendNotification("An unexpected error occurred while deleting", "error");
     }
-  }, [currentStaffId, staff, setStaff, sendNotification, databaseHelpers]);
+  }, [currentStaffId, staff, setStaff, sendNotification]);
 
   // Appointment editing handler
   const handleEditAppointment = useCallback(async () => {
@@ -2453,8 +2437,8 @@ const SalonManagementSystem: React.FC = () => {
     
     // Phone number validation (only if provided)
     if (callInForm.customerPhone.trim()) {
-      const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
-      if (!phoneRegex.test(callInForm.customerPhone.trim().replace(/[\s\-\(\)]/g, ''))) {
+      const phoneRegex = /^[+]?[1-9][\d]{0,15}$/;
+      if (!phoneRegex.test(callInForm.customerPhone.trim().replace(/[\s\-()]/g, ''))) {
         sendNotification("Please enter a valid phone number", "error");
         return;
       }
@@ -2551,7 +2535,7 @@ const SalonManagementSystem: React.FC = () => {
       console.error("Call-in appointment error:", error);
       sendNotification("An unexpected error occurred", "error");
     }
-  }, [callInForm, clients, staff, services, databaseHelpers, sendNotification, setAppointments]);
+  }, [callInForm, clients, services, appointments, sendNotification, setAppointments, setClients]);
 
   // Modal close handlers
   const handleCloseStaffModal = useCallback(() => {
@@ -2694,7 +2678,7 @@ const SalonManagementSystem: React.FC = () => {
       console.error("Booking error:", error);
       sendNotification("An unexpected error occurred while booking", "error");
     }
-  }, [customerBooking, clients, staff, services, databaseHelpers, sendNotification, setAppointments]);
+  }, [customerBooking, clients, staff, services, appointments, sendNotification, setAppointments, setClients]);
 
   // 2. Update handleWorkInRequestSubmit to go to step 8
   interface HandleShowWorkInResponseModal {
@@ -2774,8 +2758,8 @@ const SalonManagementSystem: React.FC = () => {
       validationErrors.push("Please enter your phone number");
     }
     // Phone number validation
-    const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
-    if (customerBooking.customerInfo.phone.trim() && !phoneRegex.test(customerBooking.customerInfo.phone.trim().replace(/[\s\-\(\)]/g, ''))) {
+          const phoneRegex = /^[+]?[1-9][\d]{0,15}$/;
+      if (customerBooking.customerInfo.phone.trim() && !phoneRegex.test(customerBooking.customerInfo.phone.trim().replace(/[\s\-()]/g, ''))) {
       validationErrors.push("Please enter a valid phone number");
     }
     // Email validation (if provided)
@@ -2856,7 +2840,7 @@ const SalonManagementSystem: React.FC = () => {
         "error"
       );
     }
-  }, [customerBooking, sendNotification, setWorkInRequests, setBookingStep, databaseHelpers, transformDatabaseToUI]);
+  }, [customerBooking, clients, sendNotification, setWorkInRequests, setBookingStep, setClients]);
 
   // Compute dashboard metrics
   const dashboardMetrics = useMemo(() => {

@@ -15,7 +15,7 @@ export const supabaseHelpers = {
   // Test database connection
   testConnection: async () => {
     try {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from("services")
         .select("count")
         .limit(1);
