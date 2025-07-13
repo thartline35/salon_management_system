@@ -1,7 +1,35 @@
 // Vercel Serverless Function for Free Notifications
 // Supports SMS via email-to-SMS gateways and email via free services
 
-export default async function handler(req, res) {
+interface SMSData {
+  to: string;
+  message: string;
+  carrier?: string;
+}
+
+interface EmailData {
+  to: string;
+  subject: string;
+  message: string;
+}
+
+interface WorkInResponseData {
+  request: any;
+  staffMember: any;
+  status: "approved" | "denied";
+  responseNotes?: string;
+  services?: any[];
+  selectedTime?: string;
+}
+
+interface CancellationData {
+  appointment: any;
+  staffMember: any;
+  service: any;
+  client: any;
+}
+
+export default async function handler(req: any, res: any) {
   // Set CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -104,6 +132,7 @@ async function handleSMS(res, { to, message, carrier = 'verizon' }) {
       to: email,
       subject: '',
       text: message,
+      html: message,
       from: 'noreply@twistedroots.com'
     });
 
@@ -153,7 +182,7 @@ async function handleEmail(res, { to, subject, message }) {
     } else {
       return res.status(500).json({
         success: false,
-        error: result.error || 'Failed to send email'
+        error: (result as any).error || 'Failed to send email'
       });
     }
   } catch (error) {
@@ -175,7 +204,7 @@ async function handleWorkInResponse(res, { request, staffMember, status, respons
 
   try {
     const { customerInfo, requestedDate, requestedTime } = request;
-    const serviceName = services.find(s => s.id === request.serviceId)?.name || 'Service';
+    const serviceName = (services as any[]).find((s: any) => s.id === request.serviceId)?.name || 'Service';
     
     const formattedDate = new Date(requestedDate).toLocaleDateString('en-US', {
       weekday: 'long',
