@@ -18,6 +18,7 @@ export interface SMSParams {
   to: string;
   message: string;
   from?: string;
+  carrier?: string;
 }
 
 export interface WorkInResponseParams {
@@ -63,16 +64,17 @@ class NotificationService {
       //   to: params.to
       // });
 
-      // For now, simulate the API call
-      const response = await fetch('/api/send-sms', {
+      // Use Vercel serverless function
+      const response = await fetch('/api/notifications', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          action: 'send-sms',
           to: params.to,
           message: params.message,
-          from: this.twilioPhoneNumber
+          carrier: params.carrier
         })
       });
 
@@ -110,18 +112,17 @@ class NotificationService {
       //   html: params.message.replace(/\n/g, '<br>')
       // });
 
-      // For now, simulate the API call
-      const response = await fetch('/api/send-email', {
+      // Use Vercel serverless function
+      const response = await fetch('/api/notifications', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          action: 'send-email',
           to: params.to,
-          from: this.sendGridFromEmail,
           subject: params.subject,
-          text: params.message,
-          html: params.message.replace(/\n/g, '<br>')
+          message: params.message
         })
       });
 

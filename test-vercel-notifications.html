@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Vercel Notifications - Twisted Roots</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            background: #8b5cf6;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        button:hover {
+            background: #7c3aed;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+        }
+        .success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+        .info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #bfdbfe;
+        }
+        .warning {
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fde68a;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test Vercel Notification System</h1>
+        <p>This page tests the Vercel serverless function for Twisted Roots Salon.</p>
+        
+        <div class="warning">
+            <strong>⚠️ Important:</strong> Make sure you've configured your environment variables in Vercel before testing!
+        </div>
+        
+        <div class="form-group">
+            <label for="testType">Test Type:</label>
+            <select id="testType" onchange="showTestForm()">
+                <option value="">Select a test...</option>
+                <option value="sms">Send SMS</option>
+                <option value="email">Send Email</option>
+                <option value="workin">Work-In Response</option>
+                <option value="cancellation">Appointment Cancellation</option>
+            </select>
+        </div>
+
+        <!-- SMS Test Form -->
+        <div id="smsForm" style="display: none;">
+            <h3>📱 Test SMS</h3>
+            <div class="form-group">
+                <label for="smsPhone">Phone Number:</label>
+                <input type="tel" id="smsPhone" placeholder="5551234567">
+            </div>
+            <div class="form-group">
+                <label for="smsCarrier">Carrier:</label>
+                <select id="smsCarrier">
+                    <option value="verizon">Verizon</option>
+                    <option value="att">AT&T</option>
+                    <option value="tmobile">T-Mobile</option>
+                    <option value="sprint">Sprint</option>
+                    <option value="boost">Boost</option>
+                    <option value="cricket">Cricket</option>
+                    <option value="metro">Metro</option>
+                    <option value="uscellular">US Cellular</option>
+                    <option value="virgin">Virgin</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="smsMessage">Message:</label>
+                <textarea id="smsMessage" rows="3" placeholder="Test message from Twisted Roots Salon">Test message from Twisted Roots Salon - Your appointment is confirmed!</textarea>
+            </div>
+            <button onclick="testSMS()">Send Test SMS</button>
+        </div>
+
+        <!-- Email Test Form -->
+        <div id="emailForm" style="display: none;">
+            <h3>📧 Test Email</h3>
+            <div class="form-group">
+                <label for="emailTo">To:</label>
+                <input type="email" id="emailTo" placeholder="test@example.com">
+            </div>
+            <div class="form-group">
+                <label for="emailSubject">Subject:</label>
+                <input type="text" id="emailSubject" placeholder="Test Email from Twisted Roots">
+            </div>
+            <div class="form-group">
+                <label for="emailMessage">Message:</label>
+                <textarea id="emailMessage" rows="5" placeholder="Test email message">Hello! This is a test email from Twisted Roots Salon.
+
+Your appointment has been confirmed for tomorrow at 2:00 PM.
+
+Thank you for choosing Twisted Roots!</textarea>
+            </div>
+            <button onclick="testEmail()">Send Test Email</button>
+        </div>
+
+        <!-- Work-In Response Test Form -->
+        <div id="workinForm" style="display: none;">
+            <h3>🔄 Test Work-In Response</h3>
+            <div class="form-group">
+                <label for="workinPhone">Customer Phone:</label>
+                <input type="tel" id="workinPhone" placeholder="5551234567">
+            </div>
+            <div class="form-group">
+                <label for="workinStatus">Status:</label>
+                <select id="workinStatus">
+                    <option value="approved">Approved</option>
+                    <option value="denied">Denied</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="workinNotes">Stylist Notes:</label>
+                <textarea id="workinNotes" rows="3" placeholder="Great timing! I can fit you in at 2 PM."></textarea>
+            </div>
+            <button onclick="testWorkIn()">Send Work-In Response</button>
+        </div>
+
+        <!-- Cancellation Test Form -->
+        <div id="cancellationForm" style="display: none;">
+            <h3>❌ Test Appointment Cancellation</h3>
+            <div class="form-group">
+                <label for="cancelPhone">Customer Phone:</label>
+                <input type="tel" id="cancelPhone" placeholder="5551234567">
+            </div>
+            <div class="form-group">
+                <label for="cancelEmail">Customer Email (optional):</label>
+                <input type="email" id="cancelEmail" placeholder="customer@example.com">
+            </div>
+            <button onclick="testCancellation()">Send Cancellation Notice</button>
+        </div>
+
+        <div id="result"></div>
+    </div>
+
+    <script>
+        function showTestForm() {
+            const testType = document.getElementById('testType').value;
+            
+            // Hide all forms
+            document.getElementById('smsForm').style.display = 'none';
+            document.getElementById('emailForm').style.display = 'none';
+            document.getElementById('workinForm').style.display = 'none';
+            document.getElementById('cancellationForm').style.display = 'none';
+            
+            // Show selected form
+            if (testType) {
+                document.getElementById(testType + 'Form').style.display = 'block';
+            }
+        }
+
+        function showResult(message, type = 'info') {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = `<div class="result ${type}">${message}</div>`;
+        }
+
+        async function testSMS() {
+            const phone = document.getElementById('smsPhone').value;
+            const carrier = document.getElementById('smsCarrier').value;
+            const message = document.getElementById('smsMessage').value;
+
+            if (!phone || !message) {
+                showResult('Please fill in all required fields.', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/notifications', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        action: 'send-sms',
+                        to: phone, 
+                        message, 
+                        carrier 
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    showResult(`✅ SMS sent successfully via ${result.carrier} gateway!`, 'success');
+                } else {
+                    showResult(`❌ SMS failed: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                showResult(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testEmail() {
+            const to = document.getElementById('emailTo').value;
+            const subject = document.getElementById('emailSubject').value;
+            const message = document.getElementById('emailMessage').value;
+
+            if (!to || !subject || !message) {
+                showResult('Please fill in all required fields.', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/notifications', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        action: 'send-email',
+                        to, 
+                        subject, 
+                        message 
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    showResult('✅ Email sent successfully!', 'success');
+                } else {
+                    showResult(`❌ Email failed: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                showResult(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testWorkIn() {
+            const phone = document.getElementById('workinPhone').value;
+            const status = document.getElementById('workinStatus').value;
+            const notes = document.getElementById('workinNotes').value;
+
+            if (!phone) {
+                showResult('Please fill in all required fields.', 'error');
+                return;
+            }
+
+            const request = {
+                customerInfo: { phone, preferredContact: 'sms' },
+                requestedDate: new Date().toISOString().split('T')[0],
+                requestedTime: '14:00',
+                serviceId: 'test-service'
+            };
+
+            const staffMember = { name: 'Test Stylist' };
+            const services = [{ id: 'test-service', name: 'Haircut' }];
+
+            try {
+                const response = await fetch('/api/notifications', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        action: 'send-work-in-response',
+                        request, 
+                        staffMember, 
+                        status, 
+                        responseNotes: notes,
+                        services,
+                        selectedTime: status === 'approved' ? '14:00' : ''
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    showResult(`✅ Work-in ${status} notification sent successfully!`, 'success');
+                } else {
+                    showResult(`❌ Work-in notification failed: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                showResult(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testCancellation() {
+            const phone = document.getElementById('cancelPhone').value;
+            const email = document.getElementById('cancelEmail').value;
+
+            if (!phone) {
+                showResult('Please fill in phone number.', 'error');
+                return;
+            }
+
+            const appointment = {
+                date: new Date().toISOString().split('T')[0],
+                time: '14:00'
+            };
+
+            const staffMember = { name: 'Test Stylist' };
+            const service = { name: 'Haircut' };
+            const client = { 
+                name: 'Test Customer', 
+                phone, 
+                email,
+                preferredContact: email ? 'email' : 'sms'
+            };
+
+            try {
+                const response = await fetch('/api/notifications', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        action: 'send-cancellation',
+                        appointment, 
+                        staffMember, 
+                        service, 
+                        client 
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    showResult('✅ Cancellation notification sent successfully!', 'success');
+                } else {
+                    showResult(`❌ Cancellation notification failed: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                showResult(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+    </script>
+</body>
+</html> 
