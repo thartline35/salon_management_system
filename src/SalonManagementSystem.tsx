@@ -52,7 +52,6 @@ const transformDatabaseToUI = {
     id: dbStaff.id, // Already converted in helpers
     name: dbStaff.name,
     phone: dbStaff.phone,
-    email: dbStaff.email,
     bio: dbStaff.bio,
     specialties: dbStaff.specialties,
     avatar: dbStaff.avatar,
@@ -76,11 +75,9 @@ const transformDatabaseToUI = {
     id: dbCustomer.id, // Already converted in helpers
     name: dbCustomer.name,
     phone: dbCustomer.phone,
-    email: dbCustomer.email,
     notes: dbCustomer.notes,
     lastVisit: dbCustomer.lastVisit,
     avatar: dbCustomer.avatar,
-    preferredContact: dbCustomer.preferredContact,
   }),
   appointment: (dbAppointment: any) => ({
     id: dbAppointment.id, // Already converted in helpers
@@ -863,14 +860,6 @@ const StaffModal: React.FC<
                       className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                     />
                   </div>
-
-                  <input
-                    type="email"
-                    placeholder="Email Address"
-                    value={staffForm.email}
-                    onChange={(e) => handleInputChange("email", e.target.value)}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  />
 
                   <textarea
                     placeholder="Bio (experience, specialties description)"
@@ -1944,9 +1933,6 @@ const SalonManagementSystem: React.FC = () => {
       name: "",
       phone: "",
       notes: "",
-      email: "",
-      preferredContact: "sms" as "email" | "sms",
-      carrier: "",
     },
   });
   const [bookingStep, setBookingStep] = useState<number>(1);
@@ -1968,7 +1954,6 @@ const SalonManagementSystem: React.FC = () => {
   const [staffForm, setStaffForm] = useState<StaffFormData>({
     name: "",
     phone: "",
-    email: "",
     bio: "",
     specialties: "",
     availability: {
@@ -1994,8 +1979,6 @@ const SalonManagementSystem: React.FC = () => {
   const [callInForm, setCallInForm] = useState({
     customerName: "",
     customerPhone: "",
-    customerEmail: "",
-    customerCarrier: "",
     selectedService: null as Service | null,
     selectedStaff: null as StaffMember | null,
     appointmentDate: "",
@@ -2101,7 +2084,6 @@ const SalonManagementSystem: React.FC = () => {
         result = await updateStaff(editingStaff.id, {
           name: staffForm.name,
           phone: staffForm.phone,
-          email: staffForm.email,
           bio: staffForm.bio,
           specialties: staffForm.specialties
             .split(",")
@@ -2130,7 +2112,6 @@ const SalonManagementSystem: React.FC = () => {
         setStaffForm({
           name: "",
           phone: "",
-          email: "",
           bio: "",
           specialties: "",
           availability: {
@@ -2473,19 +2454,14 @@ const SalonManagementSystem: React.FC = () => {
       const message = `Your appointment has been cancelled.\n\nService: ${service.name}\nStylist: ${staffMember.name}\nDate: ${formattedDate}\nTime: ${formattedTime}\n\nPlease call Twisted Roots to reschedule your appointment.\n\nThank you for understanding.`;
 
       try {
-        if (client.preferredContact === "email" && client.email) {
-          await sendNotification("Email notification sent", "success");
-        } else {
-          const smsMessage = `Twisted Roots: Your appointment for ${service.name} with ${staffMember.name} on ${formattedDate} at ${formattedTime} has been CANCELLED. Please call to reschedule.`;
-          await sendNotification("SMS notification sent", "success");
-        }
+        await sendNotification("Appointment cancelled successfully", "success");
       } catch (error) {
         console.error("Failed to send cancellation notification:", error);
         // Don't fail the cancellation if notification fails
       }
 
       sendNotification(
-        `✅ Appointment cancelled for ${client.name}. Notification sent via ${client.preferredContact}.`,
+        `✅ Appointment cancelled for ${client.name}.`,
         "success"
       );
     } catch (error) {
@@ -2542,7 +2518,6 @@ const SalonManagementSystem: React.FC = () => {
           name: callInForm.customerName,
           phone: callInForm.customerPhone,
           notes: callInForm.notes,
-          preferredContact: "sms",
         });
         if (!customerResult.success || !customerResult.data) {
           sendNotification("Error creating customer profile", "error");
@@ -2587,17 +2562,15 @@ const SalonManagementSystem: React.FC = () => {
           "success"
         );
         // Reset form
-            setCallInForm({
-      customerName: "",
-      customerPhone: "",
-      customerEmail: "",
-      customerCarrier: "",
-      selectedService: null,
-      selectedStaff: null,
-      appointmentDate: "",
-      appointmentTime: "",
-      notes: "",
-    });
+        setCallInForm({
+          customerName: "",
+          customerPhone: "",
+          selectedService: null,
+          selectedStaff: null,
+          appointmentDate: "",
+          appointmentTime: "",
+          notes: "",
+        });
         setShowCallInModal(false);
         // Add to local state
         const newAppointment = transformDatabaseToUI.appointment(result.data);
@@ -2616,7 +2589,6 @@ const SalonManagementSystem: React.FC = () => {
     setStaffForm({
       name: "",
       phone: "",
-      email: "",
       bio: "",
       specialties: "",
       availability: {
@@ -3355,7 +3327,6 @@ const SalonManagementSystem: React.FC = () => {
                               setStaffForm({
                                 name: member.name,
                                 phone: member.phone,
-                                email: member.email,
                                 bio: member.bio,
                                 specialties: member.specialties.join(", "),
                                 availability: member.availability,
@@ -3629,9 +3600,6 @@ const SalonManagementSystem: React.FC = () => {
                     name: "",
                     phone: "",
                     notes: "",
-                    email: "",
-                    preferredContact: "sms" as "email" | "sms",
-                    carrier: "",
                   },
                 });
               }}
@@ -4284,63 +4252,16 @@ const SalonManagementSystem: React.FC = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     How would you like to be contacted?
                   </label>
-                  <select
-                    value={customerBooking.customerInfo.preferredContact}
-                    onChange={(e) =>
-                      setCustomerBooking((prev) => ({
-                        ...prev,
-                        customerInfo: {
-                          ...prev.customerInfo,
-                          preferredContact: e.target.value as "email" | "sms",
-                        },
-                      }))
-                    }
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
-                  >
-                    <option value="sms">Text Message</option>
-                    <option value="email">Email</option>
-                  </select>
+
                 </div>
 
-                {/* Carrier selection for SMS notifications */}
-                {customerBooking.customerInfo.preferredContact === "sms" && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Mobile Carrier (for text notifications)
-                    </label>
-                    <select
-                      value={customerBooking.customerInfo.carrier || ""}
-                      onChange={(e) =>
-                        setCustomerBooking((prev) => ({
-                          ...prev,
-                          customerInfo: {
-                            ...prev.customerInfo,
-                            carrier: e.target.value,
-                          },
-                        }))
-                      }
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
-                    >
-                      <option value="">Select your carrier...</option>
-                      <option value="verizon">Verizon</option>
-                      <option value="att">AT&T</option>
-                      <option value="tmobile">T-Mobile</option>
-                      <option value="sprint">Sprint</option>
-                      <option value="boost">Boost Mobile</option>
-                      <option value="cricket">Cricket</option>
-                      <option value="metro">Metro by T-Mobile</option>
-                      <option value="uscellular">US Cellular</option>
-                      <option value="virgin">Virgin Mobile</option>
-                    </select>
-                  </div>
-                )}
+
 
                 <button
                   onClick={handleCustomerBookingSubmit}
                   disabled={
                     !customerBooking.customerInfo.name.trim() ||
-                    !customerBooking.customerInfo.phone.trim() ||
-                    (customerBooking.customerInfo.preferredContact === "sms" && !customerBooking.customerInfo.carrier)
+                    !customerBooking.customerInfo.phone.trim()
                   }
                   className="w-full bg-green-600 text-white py-4 rounded-lg hover:bg-green-700 transition-all font-medium text-lg disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed"
                 >
@@ -4385,13 +4306,6 @@ const SalonManagementSystem: React.FC = () => {
                   })}
                 </p>
               </div>
-              <p className="text-gray-600 mb-6">
-                You'll receive a confirmation{" "}
-                {customerBooking.customerInfo.preferredContact === "email"
-                  ? "email"
-                  : "text"}{" "}
-                shortly.
-              </p>
               <button
                 onClick={() => {
                   setBookingStep(1);
@@ -4404,9 +4318,6 @@ const SalonManagementSystem: React.FC = () => {
                       name: "",
                       phone: "",
                       notes: "",
-                      email: "",
-                      preferredContact: "sms" as "email" | "sms",
-                      carrier: "",
                     },
                   });
                 }}
@@ -4615,76 +4526,9 @@ const SalonManagementSystem: React.FC = () => {
                     />
                   </div>
 
-                  <input
-                    type="text"
-                    placeholder="Email Address (optional)"
-                    value={customerBooking.customerInfo.email}
-                    onChange={(e) =>
-                      setCustomerBooking((prev) => ({
-                        ...prev,
-                        customerInfo: {
-                          ...prev.customerInfo,
-                          email: e.target.value,
-                        },
-                      }))
-                    }
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
-                  />
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Preferred Contact Method
-                    </label>
-                    <select
-                      value={customerBooking.customerInfo.preferredContact}
-                      onChange={(e) =>
-                        setCustomerBooking((prev) => ({
-                          ...prev,
-                          customerInfo: {
-                            ...prev.customerInfo,
-                            preferredContact: e.target.value as "email" | "sms",
-                          },
-                        }))
-                      }
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
-                    >
-                      <option value="sms">Text Message</option>
-                      <option value="email">Email</option>
-                    </select>
-                  </div>
 
-                  {/* Carrier selection for SMS notifications */}
-                  {customerBooking.customerInfo.preferredContact === "sms" && (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Mobile Carrier (for text notifications)
-                      </label>
-                      <select
-                        value={customerBooking.customerInfo.carrier || ""}
-                        onChange={(e) =>
-                          setCustomerBooking((prev) => ({
-                            ...prev,
-                            customerInfo: {
-                              ...prev.customerInfo,
-                              carrier: e.target.value,
-                            },
-                          }))
-                        }
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
-                      >
-                        <option value="">Select your carrier...</option>
-                        <option value="verizon">Verizon</option>
-                        <option value="att">AT&T</option>
-                        <option value="tmobile">T-Mobile</option>
-                        <option value="sprint">Sprint</option>
-                        <option value="boost">Boost Mobile</option>
-                        <option value="cricket">Cricket</option>
-                        <option value="metro">Metro by T-Mobile</option>
-                        <option value="uscellular">US Cellular</option>
-                        <option value="virgin">Virgin Mobile</option>
-                      </select>
-                    </div>
-                  )}
+
 
                   <textarea
                     placeholder="Special requests or notes for your stylist"
@@ -4752,8 +4596,7 @@ const SalonManagementSystem: React.FC = () => {
                   {(!customerBooking.selectedStaff ||
                     !customerBooking.selectedDate ||
                     !customerBooking.customerInfo.name.trim() ||
-                    !customerBooking.customerInfo.phone.trim() ||
-                    (customerBooking.customerInfo.preferredContact === "sms" && !customerBooking.customerInfo.carrier)) && (
+                    !customerBooking.customerInfo.phone.trim()) && (
                     <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                       <p className="text-yellow-800 text-sm font-medium">
                         Please complete the following:
@@ -4771,9 +4614,6 @@ const SalonManagementSystem: React.FC = () => {
                         {!customerBooking.customerInfo.phone.trim() && (
                           <li>• Enter your phone number</li>
                         )}
-                        {customerBooking.customerInfo.preferredContact === "sms" && !customerBooking.customerInfo.carrier && (
-                          <li>• Select your mobile carrier</li>
-                        )}
                       </ul>
                     </div>
                   )}
@@ -4788,8 +4628,7 @@ const SalonManagementSystem: React.FC = () => {
                       !customerBooking.selectedStaff ||
                       !customerBooking.selectedDate ||
                       !customerBooking.customerInfo.name.trim() ||
-                      !customerBooking.customerInfo.phone.trim() ||
-                      (customerBooking.customerInfo.preferredContact === "sms" && !customerBooking.customerInfo.carrier)
+                      !customerBooking.customerInfo.phone.trim()
                     }
                     className="w-full bg-orange-600 text-white py-4 px-6 rounded-lg hover:bg-orange-700 transition-all font-medium text-lg disabled:bg-gray-300 disabled:text-gray-900 disabled:cursor-not-allowed border-2 border-orange-600 disabled:border-gray-300"
                     style={{ 
@@ -4797,20 +4636,17 @@ const SalonManagementSystem: React.FC = () => {
                       color: (!customerBooking.selectedStaff ||
                         !customerBooking.selectedDate ||
                         !customerBooking.customerInfo.name.trim() ||
-                        !customerBooking.customerInfo.phone.trim() ||
-                        (customerBooking.customerInfo.preferredContact === "sms" && !customerBooking.customerInfo.carrier)) ? '#111827' : '#000000',
+                        !customerBooking.customerInfo.phone.trim()) ? '#111827' : '#000000',
                       textShadow: (!customerBooking.selectedStaff ||
                         !customerBooking.selectedDate ||
                         !customerBooking.customerInfo.name.trim() ||
-                        !customerBooking.customerInfo.phone.trim() ||
-                        (customerBooking.customerInfo.preferredContact === "sms" && !customerBooking.customerInfo.carrier)) ? 'none' : '0 1px 2px rgba(255,255,255,0.8)'
+                        !customerBooking.customerInfo.phone.trim()) ? 'none' : '0 1px 2px rgba(255,255,255,0.8)'
                     }}
                   >
                     {!customerBooking.selectedStaff ||
                     !customerBooking.selectedDate ||
                     !customerBooking.customerInfo.name.trim() ||
-                    !customerBooking.customerInfo.phone.trim() ||
-                    (customerBooking.customerInfo.preferredContact === "sms" && !customerBooking.customerInfo.carrier)
+                    !customerBooking.customerInfo.phone.trim()
                       ? "Complete Required Fields"
                       : "Submit Work-In Request"}
                   </button>
@@ -4839,7 +4675,7 @@ const SalonManagementSystem: React.FC = () => {
                     ? `Preferred Time: ${customerBooking.selectedTime}`
                     : "Preferred Time: Flexible (any time)"}
                   <br />
-                  Contact: {customerBooking.customerInfo.preferredContact}
+
                 </p>
               </div>
               <p className="text-gray-600 mb-6">
@@ -4859,9 +4695,6 @@ const SalonManagementSystem: React.FC = () => {
                       name: "",
                       phone: "",
                       notes: "",
-                      email: "",
-                      preferredContact: "sms" as "email" | "sms",
-                      carrier: "",
                     },
                     isWorkInRequest: false,
                   });
@@ -5401,6 +5234,7 @@ const SalonManagementSystem: React.FC = () => {
       </div>
     );
   }
+  return null;
 };
 
 

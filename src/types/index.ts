@@ -19,24 +19,16 @@ export interface StaffGalleryImage {
   isBeforeAfter?: boolean;
 }
 
-export interface NotificationPreferences {
-  newBooking: "email" | "sms" | "both";
-  cancellation: "email" | "sms" | "both";
-  workInRequest: "email" | "sms" | "both";
-}
-
 export interface StaffMember {
   id: string;
   name: string;
   phone: string;
-  email: string;
   bio: string;
   specialties: string[];
   avatar: string;
   profilePhoto?: string;
   availability: StaffAvailability;
   gallery: StaffGalleryImage[];
-  notificationPreferences: NotificationPreferences;
   isActive: boolean;
 }
 
@@ -45,11 +37,9 @@ export interface Client {
   id: string;
   name: string;
   phone: string;
-  email: string;
   notes: string;
   lastVisit: string;
   avatar: string;
-  preferredContact: "email" | "sms" | "both";
 }
 
 // Service types
@@ -69,9 +59,6 @@ export interface CustomerInfo {
   name: string;
   phone: string;
   notes: string;
-  email: string;
-  preferredContact: "email" | "sms";
-  carrier?: string;
 }
 
 // Work-in request types
@@ -119,7 +106,6 @@ export interface CustomerBooking {
 export interface StaffFormData {
   name: string;
   phone: string;
-  email: string;
   bio: string;
   specialties: string;
   availability: StaffAvailability;
@@ -151,45 +137,6 @@ export interface ServiceModalProps extends ModalProps {
   setServiceForm: React.Dispatch<React.SetStateAction<ServiceFormData>>;
   handleAddService: () => void;
   editingService?: Service | null;
-}
-
-// Notification service types
-export interface SendSMSResult {
-  success: boolean;
-  error?: unknown;
-}
-
-export interface SendSMSParams {
-  to: string;
-  message: string;
-}
-
-export interface SendEmailResult {
-  success: boolean;
-  error?: unknown;
-}
-
-export interface SendEmailParams {
-  to: string;
-  subject: string;
-  message: string;
-}
-
-export interface NotificationService {
-  sendEmail: (
-    to: string,
-    subject: string,
-    message: string
-  ) => Promise<SendEmailResult>;
-  sendSMS: (to: string, message: string) => Promise<SendSMSResult>;
-  sendWorkInResponse: (
-    request: WorkInRequest,
-    staffMember: StaffMember,
-    status: "approved" | "denied",
-    responseNotes?: string,
-    services?: Service[],
-    selectedTime?: string
-  ) => Promise<SendEmailResult | SendSMSResult>;
 }
 
 // Work-in response modal types
