@@ -1137,36 +1137,7 @@ const CallInModal: React.FC<{
             />
           </div>
 
-          <input
-            type="email"
-            placeholder="Email Address (optional)"
-            value={form.customerEmail}
-            onChange={(e) => setForm({ ...form, customerEmail: e.target.value })}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
-          />
 
-          {/* Carrier selection for SMS notifications */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Mobile Carrier (for text notifications)
-            </label>
-            <select
-              value={form.customerCarrier || ""}
-              onChange={(e) => setForm({ ...form, customerCarrier: e.target.value })}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
-            >
-              <option value="">Select carrier (optional)</option>
-              <option value="verizon">Verizon</option>
-              <option value="att">AT&T</option>
-              <option value="tmobile">T-Mobile</option>
-              <option value="sprint">Sprint</option>
-              <option value="boost">Boost Mobile</option>
-              <option value="cricket">Cricket</option>
-              <option value="metro">Metro by T-Mobile</option>
-              <option value="uscellular">US Cellular</option>
-              <option value="virgin">Virgin Mobile</option>
-            </select>
-          </div>
 
           {/* Service Selection */}
           <div>
