@@ -58,7 +58,7 @@ const transformDatabaseToUI = {
     profilePhoto: dbStaff.profilePhoto,
     availability: dbStaff.availability,
     gallery: dbStaff.gallery,
-    notificationPreferences: dbStaff.notificationPreferences,
+
     isActive: true, // Filtered for active in helpers
   }),
   service: (dbService: any) => ({
