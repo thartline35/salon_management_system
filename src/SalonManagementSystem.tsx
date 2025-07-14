@@ -2330,7 +2330,7 @@ const SalonManagementSystem: React.FC = () => {
       console.error("Gallery upload error:", error);
       sendNotification("An unexpected error occurred while uploading", "error");
     }
-  }, [galleryForm, editingGalleryImage, currentStaffId, staff, setStaff, sendNotification]);
+  }, [galleryForm, editingGalleryImage, currentStaffId, setStaff, sendNotification]);
 
   // Gallery delete handler - Removes images from stylist galleries with database cleanup
   const handleDeleteGalleryImage = useCallback(async (image: any) => {
@@ -2357,7 +2357,7 @@ const SalonManagementSystem: React.FC = () => {
       console.error("Gallery delete error:", error);
       sendNotification("An unexpected error occurred while deleting", "error");
     }
-  }, [currentStaffId, staff, setStaff, sendNotification]);
+  }, [currentStaffId, setStaff, sendNotification]);
 
   // Appointment editing handler
   const handleEditAppointment = useCallback(async () => {
@@ -2411,7 +2411,7 @@ const SalonManagementSystem: React.FC = () => {
       console.error("Appointment update error:", error);
       sendNotification("An unexpected error occurred while updating the appointment", "error");
     }
-  }, [editingAppointment, editAppointmentForm, services, appointments, updateAppointment, sendNotification]);
+  }, [editingAppointment, editAppointmentForm, appointments, updateAppointment, sendNotification]);
 
   // Appointment cancellation handler
   const handleCancelAppointment = useCallback(async (appointment: Appointment) => {
@@ -2450,8 +2450,7 @@ const SalonManagementSystem: React.FC = () => {
         hour12: true,
       });
 
-      const subject = `Appointment Cancelled - ${service.name}`;
-      const message = `Your appointment has been cancelled.\n\nService: ${service.name}\nStylist: ${staffMember.name}\nDate: ${formattedDate}\nTime: ${formattedTime}\n\nPlease call Twisted Roots to reschedule your appointment.\n\nThank you for understanding.`;
+
 
       try {
         await sendNotification("Appointment cancelled successfully", "success");
