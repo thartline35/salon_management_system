@@ -2411,7 +2411,7 @@ const SalonManagementSystem: React.FC = () => {
       console.error("Appointment update error:", error);
       sendNotification("An unexpected error occurred while updating the appointment", "error");
     }
-  }, [editingAppointment, editAppointmentForm, appointments, updateAppointment, sendNotification]);
+  }, [editingAppointment, editAppointmentForm, appointments, services, updateAppointment, sendNotification]);
 
   // Appointment cancellation handler
   const handleCancelAppointment = useCallback(async (appointment: Appointment) => {
@@ -2438,17 +2438,7 @@ const SalonManagementSystem: React.FC = () => {
         return;
       }
 
-      // Send cancellation notification to customer
-      const formattedDate = new Date(appointment.date).toLocaleDateString("en-US", {
-        weekday: "long",
-        month: "long",
-        day: "numeric",
-      });
-      const formattedTime = new Date(`2000-01-01T${appointment.time}:00`).toLocaleTimeString("en-US", {
-        hour: "numeric",
-        minute: "2-digit",
-        hour12: true,
-      });
+
 
 
 
@@ -2579,7 +2569,7 @@ const SalonManagementSystem: React.FC = () => {
       console.error("Call-in appointment error:", error);
       sendNotification("An unexpected error occurred", "error");
     }
-  }, [callInForm, clients, services, appointments, sendNotification, setAppointments, setClients]);
+  }, [callInForm, clients, appointments, sendNotification, setAppointments, setClients]);
 
   // Modal close handlers
   const handleCloseStaffModal = useCallback(() => {
