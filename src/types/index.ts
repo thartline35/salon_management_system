@@ -68,10 +68,10 @@ export interface Service {
 export interface CustomerInfo {
   name: string;
   phone: string;
-  email: string;
   notes: string;
+  email: string;
   preferredContact: "email" | "sms";
-  carrier?: string; // Added for SMS notifications
+  carrier?: string;
 }
 
 // Work-in request types

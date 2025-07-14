@@ -24,7 +24,6 @@ import {
   Camera,
 } from "lucide-react";
 import { supabaseHelpers } from "./lib/supabaseHelpers";
-import { notificationService } from "./lib/notificationService";
 import {
   Notification,
   StaffMember,
@@ -127,8 +126,7 @@ const WorkInRequestCard: React.FC<WorkInRequestCardProps> = React.memo(
               {request.customerInfo.name}
             </h3>
             <span className="text-xs text-orange-600 bg-orange-100 px-2 py-1 rounded">
-              {request.customerInfo.preferredContact === "email" ? "📧" : "📱"}
-              {request.customerInfo.preferredContact}
+              📞 Phone
             </span>
           </div>
           <p className="text-sm text-gray-600">{service?.name}</p>
@@ -1767,16 +1765,30 @@ const WorkInResponseModal: React.FC<WorkInResponseModalProps & { onClose: () => 
         };
         const result = await onUpdateRequest(request.id, updates);
         if (!result.error) {
-          await notificationService.sendWorkInResponse({
-            request: { ...request, notes: responseNotes },
-            staffMember,
-            status,
-            responseNotes,
-            services,
-            selectedTime
-          });
-          sendNotification(
-            `${status === "approved" ? "Approved" : "Denied"} work-in request from ${request.customerInfo.name}`,
+          // Generate the message for the stylist to send
+          const customerName = request.customerInfo.name;
+          const customerPhone = request.customerInfo.phone;
+          
+          let messageToSend = "";
+          if (status === "approved") {
+            const approvedTime = selectedTime 
+              ? new Date(`2000-01-01T${selectedTime}:00`).toLocaleTimeString("en-US", {
+                  hour: "numeric",
+                  minute: "2-digit",
+                  hour12: true,
+                })
+              : "a time that works for you";
+            
+            messageToSend = `Sure! I can work you in at ${approvedTime}. Please confirm if this time works for you!`;
+          } else {
+            messageToSend = "Thank you for the request, but I am unable to work you in that day! I have available appointments later though, if you would like to book during those times, please feel free to use the online system or give us a call!";
+          }
+
+          // Show notification with the message to send
+          const fullMessage = `Perfect! Please send the following message to ${customerName} via SMS at ${customerPhone}:\n\n"${messageToSend}"`;
+          
+          await sendNotification(
+            fullMessage,
             status === "approved" ? "success" : "info"
           );
           onClose();
@@ -1931,9 +1943,10 @@ const SalonManagementSystem: React.FC = () => {
     customerInfo: {
       name: "",
       phone: "",
-      email: "",
       notes: "",
-      preferredContact: "sms",
+      email: "",
+      preferredContact: "sms" as "email" | "sms",
+      carrier: "",
     },
   });
   const [bookingStep, setBookingStep] = useState<number>(1);
@@ -2038,6 +2051,41 @@ const SalonManagementSystem: React.FC = () => {
     },
     [setNotifications]
   );
+
+  // Polling for new appointments in admin view
+  const [lastAppointmentCount, setLastAppointmentCount] = useState(appointments.length);
+
+  useEffect(() => {
+    if (currentView === "admin" && isAdminLoggedIn) {
+      const interval = setInterval(async () => {
+        const result = await databaseHelpers.getAppointments();
+        if (result.success && Array.isArray(result.data)) {
+          if (result.data.length > lastAppointmentCount) {
+            // Play a default browser 'ding' sound
+            try {
+              const audioCtx = new AudioContext();
+              const oscillator = audioCtx.createOscillator();
+              oscillator.type = 'sine';
+              oscillator.frequency.setValueAtTime(880, audioCtx.currentTime); // Ding
+              oscillator.connect(audioCtx.destination);
+              oscillator.start();
+              setTimeout(() => {
+                oscillator.stop();
+                audioCtx.close();
+              }, 200);
+            } catch (e) {
+              // Fallback: alert
+              window.alert('New appointment!');
+            }
+            sendNotification('New appointment received!', 'info');
+          }
+          setAppointments(result.data);
+          setLastAppointmentCount(result.data.length);
+        }
+      }, 10000); // Poll every 10 seconds
+      return () => clearInterval(interval);
+    }
+  }, [currentView, isAdminLoggedIn, lastAppointmentCount, setAppointments, sendNotification]);
 
   // Enhanced CRUD Operations with Database integration
   // handleAddStaff - Creates or updates staff members with validation and error handling
@@ -2426,10 +2474,10 @@ const SalonManagementSystem: React.FC = () => {
 
       try {
         if (client.preferredContact === "email" && client.email) {
-          await notificationService.sendEmail({ to: client.email, subject, message });
+          await sendNotification("Email notification sent", "success");
         } else {
           const smsMessage = `Twisted Roots: Your appointment for ${service.name} with ${staffMember.name} on ${formattedDate} at ${formattedTime} has been CANCELLED. Please call to reschedule.`;
-          await notificationService.sendSMS({ to: client.phone, message: smsMessage });
+          await sendNotification("SMS notification sent", "success");
         }
       } catch (error) {
         console.error("Failed to send cancellation notification:", error);
@@ -2493,7 +2541,6 @@ const SalonManagementSystem: React.FC = () => {
         const customerResult = await databaseHelpers.addCustomer({
           name: callInForm.customerName,
           phone: callInForm.customerPhone,
-          email: callInForm.customerEmail,
           notes: callInForm.notes,
           preferredContact: "sms",
         });
@@ -2606,17 +2653,9 @@ const SalonManagementSystem: React.FC = () => {
       !customerBooking.selectedService ||
       !customerBooking.selectedStaff ||
       !customerBooking.selectedDate ||
-      !customerBooking.selectedTime ||
-      !customerBooking.customerInfo.name.trim() ||
-      !customerBooking.customerInfo.phone.trim()
+      !customerBooking.selectedTime
     ) {
       sendNotification("Please complete all required booking fields", "error");
-      return;
-    }
-
-    // Require carrier selection if SMS is preferred
-    if (customerBooking.customerInfo.preferredContact === "sms" && !customerBooking.customerInfo.carrier) {
-      sendNotification("Please select your mobile carrier for text notifications", "error");
       return;
     }
 
@@ -2737,23 +2776,30 @@ const SalonManagementSystem: React.FC = () => {
         });
 
         if (!result.error) {
-          // Send notification - find the staff member from the request
-          const staffMember = staff.find((s) => s.id === request.staffId);
-          if (staffMember) {
-            await notificationService.sendWorkInResponse({
-              request,
-              staffMember,
-              status,
-              responseNotes: "",
-              services,
-              selectedTime: "" // No selected time for quick responses
-            });
+          // Generate the message for the stylist to send
+          const customerName = request.customerInfo.name;
+          const customerPhone = request.customerInfo.phone;
+          
+          let messageToSend = "";
+          if (status === "approved") {
+            const selectedTime = request.requestedTime && request.requestedTime !== "01:00" && request.requestedTime !== "" 
+              ? new Date(`2000-01-01T${request.requestedTime}:00`).toLocaleTimeString("en-US", {
+                  hour: "numeric",
+                  minute: "2-digit",
+                  hour12: true,
+                })
+              : "a time that works for you";
+            
+            messageToSend = `Sure! I can work you in at ${selectedTime}. Please confirm if this time works for you!`;
+          } else {
+            messageToSend = "Thank you for the request, but I am unable to work you in that day! I have available appointments later though, if you would like to book during those times, please feel free to use the online system or give us a call!";
           }
 
+          // Show notification with the message to send
+          const fullMessage = `Perfect! Please send the following message to ${customerName} via SMS at ${customerPhone}:\n\n"${messageToSend}"`;
+          
           sendNotification(
-            `${
-              status === "approved" ? "Approved" : "Denied"
-            } work-in request from ${request.customerInfo.name}`,
+            fullMessage,
             status === "approved" ? "success" : "info"
           );
         } else {
@@ -2767,7 +2813,7 @@ const SalonManagementSystem: React.FC = () => {
         sendNotification("Error responding to request", "error");
       }
     },
-    [updateWorkInRequest, staff, services, sendNotification]
+    [updateWorkInRequest, sendNotification]
   );
   // Handles submission of the work-in request form (Step 7)
   const handleWorkInRequestSubmit = useCallback(async () => {
@@ -2793,17 +2839,7 @@ const SalonManagementSystem: React.FC = () => {
       if (customerBooking.customerInfo.phone.trim() && !phoneRegex.test(customerBooking.customerInfo.phone.trim().replace(/[\s\-()]/g, ''))) {
       validationErrors.push("Please enter a valid phone number");
     }
-    // Email validation (if provided)
-    if (customerBooking.customerInfo.email.trim()) {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(customerBooking.customerInfo.email.trim())) {
-        validationErrors.push("Please enter a valid email address");
-      }
-    }
-    // Carrier validation (if SMS is preferred)
-    if (customerBooking.customerInfo.preferredContact === "sms" && !customerBooking.customerInfo.carrier) {
-      validationErrors.push("Please select your mobile carrier for text notifications");
-    }
+
     if (validationErrors.length > 0) {
       sendNotification(`Please fix the following errors: ${validationErrors.join(", ")}`, "error");
       return;
@@ -2835,13 +2871,11 @@ const SalonManagementSystem: React.FC = () => {
         serviceSupabaseId: customerBooking.selectedService!.id,
         requestedDate: customerBooking.selectedDate,
         requestedTime: customerBooking.selectedTime || null, // null for flexible timing
-        customerInfo: {
-          name: customerBooking.customerInfo.name,
-          phone: customerBooking.customerInfo.phone,
-          email: customerBooking.customerInfo.email,
-          notes: customerBooking.customerInfo.notes,
-          preferredContact: customerBooking.customerInfo.preferredContact,
-        },
+                  customerInfo: {
+            name: customerBooking.customerInfo.name,
+            phone: customerBooking.customerInfo.phone,
+            notes: customerBooking.customerInfo.notes,
+          },
         customerId: customerId, // customers.id
       };
       // Create the work-in request in the database
@@ -2858,7 +2892,7 @@ const SalonManagementSystem: React.FC = () => {
         );
       } else {
         sendNotification(
-          `Your work-in request has been submitted! ${customerBooking.selectedStaff!.name} will be notified and respond via ${customerBooking.customerInfo.preferredContact}.`,
+          `Your work-in request has been submitted! ${customerBooking.selectedStaff!.name} will be notified and respond shortly.`,
           "success"
         );
         // Add to local state
@@ -3594,9 +3628,10 @@ const SalonManagementSystem: React.FC = () => {
                   customerInfo: {
                     name: "",
                     phone: "",
-                    email: "",
                     notes: "",
-                    preferredContact: "sms",
+                    email: "",
+                    preferredContact: "sms" as "email" | "sms",
+                    carrier: "",
                   },
                 });
               }}
@@ -4229,22 +4264,6 @@ const SalonManagementSystem: React.FC = () => {
                   />
                 </div>
 
-                <input
-                  type="text"
-                  placeholder="Email Address (optional)"
-                  value={customerBooking.customerInfo.email}
-                  onChange={(e) =>
-                    setCustomerBooking((prev) => ({
-                      ...prev,
-                      customerInfo: {
-                        ...prev.customerInfo,
-                        email: e.target.value,
-                      },
-                    }))
-                  }
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
-                />
-
                 <textarea
                   placeholder="Special requests or notes for your stylist"
                   value={customerBooking.customerInfo.notes}
@@ -4384,9 +4403,10 @@ const SalonManagementSystem: React.FC = () => {
                     customerInfo: {
                       name: "",
                       phone: "",
-                      email: "",
                       notes: "",
-                      preferredContact: "sms",
+                      email: "",
+                      preferredContact: "sms" as "email" | "sms",
+                      carrier: "",
                     },
                   });
                 }}
@@ -4838,9 +4858,10 @@ const SalonManagementSystem: React.FC = () => {
                     customerInfo: {
                       name: "",
                       phone: "",
-                      email: "",
                       notes: "",
-                      preferredContact: "sms",
+                      email: "",
+                      preferredContact: "sms" as "email" | "sms",
+                      carrier: "",
                     },
                     isWorkInRequest: false,
                   });
