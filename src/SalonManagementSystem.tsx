@@ -5369,3 +5369,4 @@ const timeSlotUtils = {
 export default SalonManagementSystem;
 
 // Force redeploy - Sun Jul 13 20:33:54 CDT 2025
+// Force update - Sun Jul 13 21:13:58 CDT 2025
